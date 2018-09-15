@@ -1,0 +1,313 @@
+-----------------------------------------------------------Smarty--------------------------------------------------
+
+
+ ------------------编程简化控制语句
+ 1.class=""   可以添加{if}{/if}
+ 2.注意if嵌套if也要{/if} 配对
+ 3.每一次都想的太简单了,导致重复代码写的过多,注意简化代码
+ 
+ 
+ ----------------------------------------------------------------------------------
+    文件引用要注意路径../上级目录
+---引用
+   require('../libs/Smarty.class.php');
+ 
+---创建对像
+   $smarty = new Smarty();
+
+---配置模板文件夹
+	$smarty->template_dir = "./temp";
+	$smarty->compile_dir = "./comp";
+	--------------------'./comp'等为上层目录自己创建的文件夹---------------
+---配置配置文件夹
+$smarty->config_dir = "./conf";
+
+
+----------------------以上几步如果自己引用smarty的话必须要有的----------------------------
+
+---assign方法及使用
+   $smarty->assign('变量名','变量值',);
+   储存变量
+   
+   1.第一个参数为数组 把数组自动拆分  如
+   $user = array("phone"=>"12312","usr"=>"lnn");
+   $smarty->assign($user);
+   等同于
+   $smarty->assign("phone","12312");
+   $smarty->assign("usr","lnn");
+   前端和普通变量一样引用
+   
+   2.存储相同标签赋多个值
+     $smarty->assign("stu","lisi")
+     $smarty->append("stu","lisan");
+	 相当于stu被转化为一个数组  前端用下标来获取值
+	 
+---系统保留变量
+	$smarty->assign('id',$_GET['id'])
+	{$smarty.get.id}    前端
+	$smarty.cookies;
+	$smarty.session;
+	
+---引用常量
+   define("hh",'da');
+   {$smarty.const.常量名}
+   
+---配置文件中变量
+	.conf结尾
+	选项=值
+	选项=值
+ 
+---引用配置文件中的变量
+    ----引用文件
+	{config_load file="文件名" section=""}
+	---引用变量
+	1.{#变量名#}
+	2. {$smarty.config.name}
+	
+---引用其他的tpl或html文件
+   {include file="文件名" title=foo}
+   也可传变量值  如title=foo
+   
+---smarty 可以赋值一个对象(类)
+   前端对象的引用
+   {$变量名->属性名}
+   {$变量名->方法名()}
+   原则:不推荐在模板里使用方法，标签只负责变量的输出.
+   
+---模板标签的计算
+	$age = 100;$name = 10;
+   {$age+*/- 10}  参与运算 但不推荐
+   {$name - $age}
+   smarty2.6 中$要在数值的前面
+   
+---模板中的逻辑运算(分支) 模板只支持if语句
+		if语句
+		{if $age > 12}
+		   12岁
+		   {else}             ------可选
+		   其他岁
+		{/if}                 ------必有  成对出现
+		                      ------每一个if都要有一个{/if}
+
+        if-elseif
+		{if }
+		  {elseif }
+		  {else}
+		{/if}
+		
+---模板中的循环
+    for/while(3新增)  foreach/section
+	
+	  for               ----只能从小到大
+	  {for $i=初始值 to 结束值 step 2}     ------ step增长的步长   $i@total 获取这次循环的总次数 
+                                            	  $i@iteration 为循环的第几次(序号)  几个循环通用
+												  $i@first 第一次循环 $i@last 最后一次循环
+      {/for}	
+	  
+     foreach    二位数组循环               ----smarty3   
+	 {foreach $php传过来的 as $key => $item}
+	  {$item.属性名}
+	 {/foreach}
+	  ||
+	 {foreach $变量数组 as $item} {foreachelse}没有信息{/item}
+	 
+     {foreach from=$php传过来的 key=key item=item}   -----smarty2
+	  {$item.属性名}
+	 {/foreach}
+	 
+	 --{break}
+	 --{continue}
+	 
+	 section
+	 {section name=outer loop=$data}    ---name section名称  loop-循环的资源  必要参数
+	 {sectionelse}                      ---驯韩二维数组 $data[outer].属性名   rownum ==> iteration  用法 $dta.name.rownum 
+	 none
+	 {/section}
+	 
+	 while
+	 $age=30
+	 {while $age >18}                  ---- ++$age 不对
+	   {$age ++}
+	   {/while}
+	   
+---压缩
+
+    {strip}{/strip}
+   
+--html输出
+   1.{html_image file width="" height=""}
+   
+   2.{html_optines}   ----<select>
+       {html_options name=foo options=$myOptions selected=$mySelect}   必须有name值
+	   options == values + output  且该数组必须为 values=>output 的形式
+	   <select name="">             multiple=multiple  可以多选
+	   {html_options values=$myOptions output=$myOptions1}
+	   </select>
+   3.{html_checkboxes}
+     {html_checkboxes name=foo options=$myOptions selectes=$mySelect separator="<br />"}
+	   separator 为分隔符
+	   
+   4.{html_radio}       一样
+   
+---变量调节器
+     是在模板中，修改变量的显示形式的一种功能
+	 如 把时间戳转化成时间格式
+	 本质是一个函数
+	 函数以标签对应的变量值为参数,进行运算,把返回值显示该处
+	 得看手册
+	 用法
+	 {$data|data_format:"日期格式"}
+	 也可以套着使用 {变量| | |}
+	 
+---网页的缓存
+    缓存数据库取出来的数据，减少查询数据库的次数
+	模板改了会影响缓存
+	smarty缓存的用法
+	1.开启                                    -$smarty->caching = true
+	2.生命周期                                -$smarty->cache_lifetime = 3600; (秒)
+	                                          -$smarty->cache_dir = './cache'  创建缓存文件夹
+	3.是否缓存并从数据库取出数据              -if(!$smarty->isCached(.tpl)) {要缓存的内容}
+	4.输出                                    -
+	
+	局部不缓存   方法
+	
+	注意：不缓存的标签要方法在{}外面，使它总能从PHP文件中得到值，而不是从缓冲文件中得到
+	
+	1.在标签中控制该标签不缓存
+	{$标签 nocache}
+	2.控制一片标签不缓存
+	{nocache}xxxxxxx{/nocache}
+	3. 赋值是控制不缓存
+	在PHP文件中  assign的第三个是Nocache  设置为true
+	$smarty->assign('time',$time,true)
+	4.调用函数   不必深入了解
+    {insert name=xxx parm1=1  parm2=2}	
+	原理；在PHP文件中调用有insert_xxx(array(parm1=1 , parm2=2)) 的函数的返回值
+	如 {insert name="info"} 相应的在PHP文件中也有insert_info 的函数来处理数据并返回处理后的数据到前端
+	
+---单模板多缓存
+    如根据id的不同 生成不同缓存
+	原理是缓存是再传一个缓存id
+	那些影响页面内容的参数就缓存的id
+	$smarty->display("文件",id(影响页面的参数))
+	判断的时候也要加缓存id
+	if(!$smarty->isCached(".tpl",id)) {要缓存的内容}
+	会生成多个缓存文件
+	memcache 缓存数据
+	
+---删除缓存
+   clearCache()
+   $smarty->clearCache("模板名",缓存id)
+   $smarty->force_cache = true; 强迫不缓存
+
+---解决重复的自动加载 
+   __autoload($class){}     -----PHP内涵自动加载函数
+   PHP 提供spl_autoload_register();    把一个函数注册成自动加载的函数
+  
+
+---变量修饰符
+   --1.capitalize   首字母大写
+       {|capitalize}     除不带数字的字母外  其余首字母大写
+       {|capitalize:true}	  所有首字母大写
+	   
+   --2.cat                 字符串的链接
+       {|cat:"yesterday"}   ===>  ...yesterday
+	   
+   --3.count_characters     计算变量里的字符总数
+       {|count_characters}  不算空格
+	   {|count_characters:true}  算空格
+	   
+   --4.count_paragraphs     计算变量里有多少个段落
+   
+   --5.count_sentences      计算变量里有多少个句子(必须以./?/!结尾)
+   
+   --6.count_words          计算变量里有多少个单词
+   
+   --7.date_format          格式化日期
+       {|date_format:"格式"}
+	   %Y-%m-%d %H:%M:%S   ===>    y-y-r h:M:S
+	   %D                  ===>    01/01/22
+	   
+   --8.default             设置默认值  (没有该变量或该变量没有赋值)
+       {|default:"no title"}
+	   
+   --9.escape               改变编码  (见手册)
+   
+   --10.from_charset        转换变量到内置字符集
+   
+   --11.indent              缩进
+       {|indent:10}         默认缩进4 空格用'/t'代表
+	   
+   --12.lower               变量转变为小写
+   
+   --13.upper               变量转变为大写
+   
+   --14.nl2br               将变量值中的"\n"回车全部转换成HTML的 <br />。
+   
+   --15.regex_replace       用正则表达式搜索和替换变量值
+   
+   --16.replace             对变量进行简单的搜索和替换
+       {|replace:'被替换元素':'替换元素'}
+	   
+   --17.spacify             在变量中插入字符 默认为空格
+       {|spacify}
+       {|spacify:"^^"}
+	   
+   --18.string_format       格式化字符串，如浮点数等。
+       {|string_format:"%.2f"}     保留两位小数
+       {|string_format:"%d"}       保留整数
+	   
+   --19.strip               转换连续空格，回车和tab到单个空格或是指定字符串。
+       {|strip}
+       {|strip:'&nbsp;'}
+	   
+   --20.strip_tags          去除标记等任何包含在< 和 >中间的字符。.
+      {|strip_tags} 
+      {|strip_tags:false}    true为设置是否将标签替换成' ' 或者 ''
+	  
+   --21.truncate              截取指定字符长度  默认80
+      {|truncate:10:替代的字符:true:true}   true 1 ==> 按字符截取 false为按单词截取
+	                                        true 2 ==> 截取到本身也截取 false 不会截取本身
+											
+   --22.unescape            可以解码entity, html 和 htmlall等的编码
+   
+   --23.wordwrap            限制一行字符的长度（自动换行），默认是80个字符长度。
+        {|wordwrap:10:true:true}            true1  ==> 是否换行
+		                                    true2  ==> 按字符截取  false 按单词截取
+							
+
+---其他问题
+    解决smarty的{}与jQuery{}以及style的{}的冲突
+	  {literal}{/literal}  包含与jQuery{}以及style的{}
+	  
+	  
+---高级篇(了解)
+   ----数据对象                     可以处理相同变量的不同值  划分区间
+      $h = $smarty->createData()    创建一个数据对象
+	  $h->assign("",'');            赋值
+	  $smarty->display('',$h)       告诉前端去哪个区间找数据
+	  
+   ----对象注册              -----允许调用的方法
+      $smarty->registerObject('li',$ss);
+	  前端引用  变量不带$,类的方法不带();参数三为允许调用的方法 可以为数组(值为方法名)
+	  {li->say}
+	  
+   ----模板继承
+       可以在父模板留一部分写{block name=xxxx}
+	   {extends file="}
+	   子模板第一句声明继承   只能写block内容
+	   可以用include替换
+	   
+   ----变量调节器
+       调节字符颜色   
+	   文件名为modifier.modcolor.php
+	   function Smarty_modifier_modcolor($string,$color){
+		return <font color="'.$color.'">'.$string.'</font>
+	   }
+	   
+   ----display与fetch的区别
+	   display = echo+fetch()
+	   fetch 不进行输出只得到输出的内容但不输出
+	   ob_start()   打开缓冲区
+	   ob_get_content()    获取内容
+	   ob_clean()    清空缓冲区
