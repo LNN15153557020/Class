@@ -1,0 +1,114 @@
+ 
+ ----------------------------jQuery ui widgets--------------------------------
+ 
+ 1.draggable      拖
+      $("#id").draggable({
+	      delay : 秒数        ----属性 延迟  毫秒
+		  cursor: 鼠标的样式    等 
+	      start:function(){}  ----开始拖动的方法
+		  drag:function(){}   ----拖动时的方法
+		  stop: function(){}   -----停止推动方法
+	  });
+	  
+  2.droppable      放     
+      $().droppable({
+	     accept ：             ----所接受的对象
+		 activeClass：          ----拖动时投放目标的样式  等
+	     activate:function(){}  ----开始拖动目标
+		 deactivate:function(){}   ----停止拖动目标
+	     drop:function(){}    -----放下完成
+		 out:function(){}      ----目标拖出边框
+		 over:function(){}      -----目标拖入边框
+	  })
+	  
+  3.resizable  尺寸大小的改变
+    $().resizable({
+	  resize : function(){}       ----改变时
+	  start: function(){}         ----开始时
+	  stop:function(){}           ----停止时
+	})
+	
+  4.selectable   选择
+	$().selectable({
+	    selected:function(){}      ----选择结束时,被选择的选择出发方法
+		selecting:function(){}     ----选择过程中,被选择的选择出发方法
+		unselected:function(){}    ----选择结束时,没被选择的选择出发方法
+		unselecting:function(){}   ----选择过程时,被选择的选择出发方法
+	});
+	它会自动在选择的元素上添加一个ui-selected的类，所以要自己写一个ui-selected类来改变选择的样式
+
+  5.sortable   排序
+    $().sortable({
+	    sort:function(){}          ---排序过程
+		start:function(){}         ---开始排序
+		stop:function(){}          ---停止排序
+	});
+	
+	控件
+	
+	Accordion
+	$("accordion").accordion()
+	html格式
+	<div id="accordion">
+	  <h3>...</h3>
+	  <div>...</div>
+	  <h3>...</h3>
+	  <div>...</div>
+	  <h3>...</h3>
+	  <div>...</div>
+	  <h3>...</h3>
+	  <div>...</div>
+	</div>
+	   
+	autoComplete   自动补全
+	var array = [];
+	$().autocomplete({
+	   source : array
+	})
+	
+	datepicker  日期
+	$().datepicker();   查看属性
+	
+	dialog      对话框
+	$().dialog();
+	$().button().on("click",function
+	(){$().dialog()})         ----点击按钮弹出对话框
+	
+	progressbar       进度条
+	$().progressbar({max:,value:,}) value 当前值
+	$().progressbar("option","value",值)
+	
+	menu             菜单
+	$().menu({position:{at:"right top}})  ----改变位置
+	
+	slider            可滑动的进度条
+	$().slider({
+	   change:function(event,ui){}       ----改变后
+       slide:function(event,ui){}	     ----改变中
+	   start:function(){}                ----开始移动
+	   stop:function(){}                 ----停止移动
+	})
+	slider("option","value")     获取当前值
+	
+	spinner              数值增长\减少
+	$().spinner();
+	spinner("value",10)   赋当前值
+	
+	tabs                 选择卡
+	$("#tabs").tabs();
+	html 格式
+	<div id="tabs">
+	  <ul>
+	     <li><a href="#tabs1">tabs1</a></li>
+         <li><a href="#tabs2">tabs2</a></li>		 
+	  </ul>
+	  <div id="tabs1>....</div>
+	  <div id="tabs2>....</div>
+	  
+--------------------------------jQuery ui 特效-------------------------------
+
+.toggle({属性/方法})  切换
+.animate({属性/方法})  动画
+.effect({属性/方法})	   特效   .effect({类型,类型的属性,持续时间,回调函数})
+.hide({属性/方法})      隐藏
+.show({属性/方法})      显示
