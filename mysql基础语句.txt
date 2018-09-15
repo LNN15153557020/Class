@@ -1,0 +1,263 @@
+1.链接服务器(命令行)
+	mysql -uusername -ppassword;
+	
+2.创/选数据库
+	create database databasename [charset utf8](字符集);
+	use databasename;
+	
+3.显示所有表和数据库
+	show tables;
+	show databases;
+	desc 表名 显示表的详细信息
+	
+4.删除数据库和表
+	drop database databasename;
+	drop table tablename;
+	
+7.创建表
+	create table tablename(
+		id int ,
+		name char(20)
+	);
+	
+	引擎 : innodb ----唯一数据库文件
+	       MyISAM ---- 每一个表独立存储在相同文件中S
+	
+	create table table1 like table2;     创建和table2结构相似的table1
+	
+	--列的最好不为null(加not null) 原因为 null为空 不可以比较 比较时 is null / is not null 其他字符时返回null 效率低
+	
+	--primary key 主键
+	
+	--foreign key 外键
+		---foreign key (本表的列名) reference 指向表(指向表的主键)
+		---两表的两列的顺序必须一样
+		
+	--unique key 唯一键
+		---unique key 别名 列名
+	
+	--default ''  设置默认值
+	
+	--check 约束函数 如 check(该列名 in ('男','女')) 该的值应该在男与女之间 否则插入失败
+	  --- enum()可以指定插入值的范围 但该列不可以指定任何数据类型
+	  --- set() 同理
+	  --- bit 0:M,1:F
+	  --- between and mysql 不适用了,要达到类似效果 在PHP或前端进行判断,在输入到数据库
+	  ---like 匹配
+	  
+	--auto_increment 自增属性
+	
+	--decimal(a,b) a指定存储的数据长度 b为存储数据应保存的小数位数
+	
+6.表的改名(MySQL 中数据库不可以改名)
+
+	(1) alter table oldtablename rename to newtablename;
+	(2) rename table oldtablename to newtablename;
+
+7.表的插入
+	1. insert into tablename(属性名) value()
+	2. insert into table1 select * from table2  查询表2的数据插入表1中 
+	--注意属性的数据类型
+	--属性名可选。指定要插入的列名
+	--没有指定默认为全表列
+	--多行插入  insert into tablename(属性名) value(),(),(),(),();
+	
+8.表的删除
+	(1) delete from tablename (where 条件);
+	(2) truncate table tablename;
+	
+	--delete 可以一条一条的数据删除;
+	--truncate 全删 删除表后新建一个空表;
+	
+9.表的更新
+	update 表名
+	set 列名 = 值
+	where 条件
+	
+	--多列修改
+		update 表名
+		set 列名 = 值,列名 = 值,列名 = 值
+		where 条件
+		
+	--全表修改
+		update 表名
+		set 列名 = 值
+		
+10.表的查询
+******* 查询的时候列可以当做变量来看待 进行运算和筛选 查询结果集可以当做另一个查询的表
+	select * from 表名
+		--- select 想要查询的列名 from 表名
+		--- select 想要查询的列名 from 表名 where 条件
+		--- as                              ---- 为查询出来的表的列取别名
+		--- distinct()                      ---- 去重
+		--- where 条件                      ---- 对表进行操作
+			---- id = 3 (等于3)  id <> 3 (不等于3) id >= 3 (大于等于) <= > <
+			---- id in (4,11)               ---- in代表括号里的范围
+			---- id between 2 and 4         ---- 代表在2到4区间里的数据都符合 包括边界值
+			---- id not in (4,11)           ---- not 条件
+			---- id = 3 and id = 4          ---- and 条件
+			---- id = 3 or id = 4           ---- or 条件
+			---- like 'a%'                  ---- %匹配任意字符 _代表单个字符  以a开头的  
+			     ----- '%a'                 ---- 以a结尾的
+			     ----- '%a%'                ---- 含有a的数据
+				 ----- '_a_'                ---- 三位且中间字母是a的
+				 ----- '_a'                 ---- 两位且结尾字母是a的
+				 ----- 'a_'                 ---- 两位且开头字母是a的
+	    --- group by                        ---- 根据列进行分组  where 之后  可以没有where
+			---- group by 列名,列名,列名
+			---- having           
+            ---- 分组进行数据函数统计计算			
+			---- WITH ROLLUP 可以实现在分组统计数据基础上再进行相同的统计（如SUM,AVG,COUNT…）在求一个总数 
+			                 但列值为null 用coalesce(name, '总数')替换null     
+		---- having                         ---- 与where区别：having为对where查询的结果集在进行筛选	
+		---- order by                       ---- 排序  对结果集进行排序
+		         ----- asc                  ---- 升序
+				 ----- desc                 ---- 降序
+	    ---- limit                          ---- 限制行数
+				 ----- limit n,m            ---- 从n行开始往下数m行
+				 
+		---- 子查询                         ---- 子查询 对于问题来说,分步来实现一个个小问题,然后通过子查询连接起。
+											---- 分析时,要从内部查询开始分析，从内到外得出结果集   效率低
+				 ----- 类型1. select * from table where id =，>,<,in等(select * from table)<=[返回查询的结果集]  
+				 ----- 类型2. select * from (select * from table) as 别名 [结果集作为临时表][别名很重要]
+                 ----- 类型3. select * from table where exists (select * from table where) 判断是否存在
+		---- 左联接
+		         ----- 笛卡尔乘积 select * from table1,talbe2;      两表需要加别名,利于前面字段的查询 结果集行数=两表行数相乘
+				 ----- select * from table1 left join table2 on 关系条件 where/group by/having/order by/limit
+				 ----- 表A在左边不动，表B在右边循环滑动，表A通过一个关系来筛选表B的相关的行
+				 ----- [table1 left join table2 on 条件] left join table3 on 条件 看做一个表
+	    ---- 右联接
+		         ----- select * from table1 right join table2 on 关系条件 where/group by/having/order by/limit
+				 -----  表A在右边不动，表B在左边循环滑动，表A通过一个关系来筛选表B的相关的行
+	    ---- 内联接
+				 ----- select * from table1 inner join table2 on 关系条件 where/group by/having/order by/limit
+		---- 三中联接区别
+				 -----
+		---- union 
+				 ----- select * from table1 union select * from table2 
+				 ----- (select * from table1 order by id asc limit 1) union (select * from table2 order by id asc limit 1)
+				 ----- 如果不加limit两个语句中order by 将不会执行 如果想执行 将order by放在整个结果集的最后
+				 ----- union 合并结果集;
+				 ----- 两个查询的结果集的列数必须相同.
+				 ----- 结果集中列名以第一个sql语句列名为准.  
+			     ----- union 自动去重
+				 ----- union all 不去重
+------------------------------------MYSQL 中的变量 @num 设置值 set @num =1;----------------------------------------------------
+	    ---- 存储过程 
+				 ----- delimiter //
+				 ----- create procedure 名字(in/out/inout 变量名 数据类型)
+				       ----- begin
+					   ----- declare 变量名 数据类型;        ----- 内部声明变量
+					   ----- select count() into 变量名 from 表名;          -----  将数据存储到内部变量中
+					   ----- if ..... then .....else ...... end if ;/if....then.....elseif...then...else....end if;
+					   ----- case 变量 when 条件 then .... when ... then.... else.... end case; -----无判断
+					   ----- case when 判断条件 then.....when ....then.... else.....end case;   -----有判断
+					   ----- end
+					   ----- //
+				 ----- delimiter ;
+				 ----- set @变量名 = 值      -----外部设置变量值
+				 ----- call 存储过程名(@变量名)    ----- 调用存储过程
+	    ---- 函数 
+				 ----- delimiter //
+				 ----- create function 函数名(变量 数据类型)returns int 返回类型
+				 ----- begin
+				 ----- declare 变量名 数据类型;        ----- 内部声明变量 可无
+				 ----- select 语句
+				      ----- if 与 case 同上
+				 
+				      ----- loop 重复循环 [begin_label:] LOOP 
+				                       statement_list   == SET @count=@count+1;     ----- begin_label与end_label 必须相同 可省略
+									  END LOOP [end_label] 
+									  
+				      ----- LEAVE label     ----leave 跳出循环语句 label为标签名 如loop的begin_label 相当于break；
+				 
+				      ----- ITERATE label        ---- 跳出当前循环语句进入下一个 相当于continue
+					  
+					  ----- REPEAT               ---- 为满足条件的循环语句
+					                        REPEAT 
+                                            SET @count=@count+1;          ---- label可省略  until满足条件
+                                            UNTIL @count=100 
+                                            END REPEAT ; 
+					 
+					  ----- while 循环 
+					                    WHILE @count<100 DO 
+                                        SET @count=@count+1;               ---- while 满足条件  do 执行
+                                        END WHILE ; 
+					  
+				 ----- return 一个值  
+				 ----- end；
+				 ----- //
+				 ----- delimiter ;
+				 ----- select 函数名()                  ----- 函数调用
+				 ----- show create function 函数名      ----- 查看函数
+				 ----- show function status [like 'pattern'] -----查看所有函数
+				 ----- alter function 函数名 选项       ----- 修改函数
+				 ----- drop function 函数名    /drop function if exists hello;         ----- 删除函数
+11.表的结构修改
+	添加列
+		alter table 表名 add 列名 列数据类型 [default '']
+		alter table 表名 add 列名 列数据类型 [default ''] after 某列   --- 在指定的列之后添加列
+		alter table 表名 add 列名 列数据类型 [default ''] first        --- 把新列添加在第一列
+	删除列
+		alter table 表名 drop 列名
+	修改列
+		alter table 表名 modify 列名 数据类型 约束条件                 --- 修改列数据类型或约束条件
+		alter table 表名 change 旧列名  新列名  数据类型 约束条件      --- 修改列名和列属性
+	
+
+12.表的列类型
+	字段类型优先级 int > date，time > char，varchar > blob 
+	整型的每一种都分有无符号（unsigned）和有符号（signed）两种类型（float和double总是带符号的）
+	无符号版本和有符号版本的区别就是无符号类型能保存2倍于有符号类型的正整数数据，
+	比如16位系统中一个int能存储的数据的范围为-32768~32767，而unsigned能存储的数据范围则是0~65535。
+	-数值型
+		--整型
+			---Tinyint     占一字节    -128——127 0——255
+			---Smallint     2
+			---Mediuint     3
+			---int 			4
+			---bigint		8
+			---zerofill 位数不够用0填充 必须与smallint(3)连用 指定宽度
+		--浮点值	
+			---float(m,d)  m 为总位数 d为小数位数
+			---double
+	-字符串
+		--定长字符串 char(2) 固定的存储空间
+		--变长字符串 varchar(20) 随数据长度而改变
+		--文本类型text 文章内容等
+		--blob类型  存储大数据 二进制 存图片，音频等  防止因为字符集的原因而丢失信息
+	-时间类型
+		--date 				YYYY-MM-DD                         4
+		--time 				HH:MM:SS                           3
+		--year   			YYYY							   1
+		--datetime 			YYYY-MM-DD HH:MM:SS                8
+		--timestamp         YYYY-MM-DD HH:MM:SS                4
+	
+	
+13.函数
+	字符串
+		-concat                          --- 链接字符串函数
+		-substring                       --- 截取
+		 -- substring（str, pos）        --- str为被截字符串 pos开始位置(不是下标从1开始) length 截取长度
+         -- substring（str, pos, length）
+		-left（被截取字段，截取长度）
+		-right（被截取字段，截取长度）
+	数值
+		-avg                             --- 求平均数
+		-sum                             --- 求和
+		-min                             --- 求最小值
+		-max                             --- 求最大值
+		-count                           --- 求符合条件的行数 count(1/2/3等)忽略所有列 count(*)返回所有行数
+	日期
+		-date_format()                   --- 日期转换 参数一转换日期  参数二要转换的格式
+		-now()                           --- 返回当前系统日期和时间
+		-curdate()                       --- 返回当前日期
+		-curtime()                       --- 返回当前时间
+		-hour()                          --- 返回time小时
+		-minute()                        --- 返回time分钟
+		-monthname()                     --- 返回date的月分名
+		-week()                          --- 返回date中第几周
+		-year()                          --- 返回date年份
+		-unix_timestamp()                --- 返回date的Unix时间戳
+		-date_add(date,expr)             --- 返回一个日期/时间加上一个时间间隔的时间值
+	
