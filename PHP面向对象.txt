@@ -1,0 +1,219 @@
+ ---------------PHP面向对象----------------
+ PHP数组函数
+   ---array_keys()  ----输出键值对数组的键
+   ---array——values() ----输出键值对数组的值
+   ---array_key_exists 判断是否存在指定键  参数1指定键  参数2 键值对数组
+   ---sql语句的拼接  用键值对数组 键对应的是列名
+   ---func_get_args()   返回外层方法的参数个数
+   ---define  定义常量  全局访问  不用加$符
+   ---很多开发者为每个类新建一个 PHP 文件
+   ---PHP_EOL        换行
+   ---范围解析符  :: 调用静态/常量或被覆盖的方法属性
+   ---静态守护星/方法   只能被实例化一次 如循环加值
+   ---由于静态方法不需要通过对象即可调用，所以伪变量 $this 在静态方法中不可用。
+   ---被定义为抽象的方法只是声明了其调用方式（参数），不能定义其具体的功能实现。
+   ---类要实现接口，必须使用和接口中所定义的方法完全一致的方式 
+   ---从基类继承的成员会被 trait 插入的成员所覆盖。优先顺序是来自当前类的成员覆盖了 trait 的方法，而 trait 则覆盖了被继承的方法。
+   ---如果父类中的方法被声明为 final，则子类无法覆盖该方法。如果一个类被声明为 final，则不能被继承
+   ---属性不能被定义为 final
+ ----------------------------------------------
+   字符集
+   header("content-type:text/html; charset=utf8");
+   $this->变量   不带$
+   unset() 销毁对象  
+   类名不能与方法名相同
+ 1.构造函数
+    
+	 __construct()    ---new 对象的时候触发
+	 
+ 2.析构函数           ---销毁函数
+
+    __destruct()      unset(对象)/对象赋其他值触发  页面执行完毕后系统会回收内存也会触发
+	
+ 3.封装
+    public   是公共的
+	private  是私有的         对象->变量 不可以    只能在class的{}里用  可用public的方法调用私有类
+	protected  是首保护       只能在自己class中用
+	private和protected  只能用方法输出  不能继承private属性和方法 可通过方法调用私有属性
+	public和protected是不可以继承的
+
+ 4.继承
+  子类继承父类的方法可以在子类中修改内容
+  parent::父类的方法    
+  子类对父类的修改或增加
+  继承的方法的权限只能宽松不能严格
+  构造方法的继承
+  子类中有构造函数 要parent::构造函数  在写自己的自己初始  防止子类覆盖父类的初始化
+  public在什么地方都可以调用
+  protected和private 不可以在类外调用  private不可以直接继承
+ 
+ 5.多态
+   php太灵活   要加限制
+   class gg{
+      public function kk(类名 $f){      -----只能引用对应类名的对象
+	  }
+   }
+   所以单独定义一个class其他类度继承这个类 （里氏代换）
+   抽象的声明父类，具体的操作在子类
+   
+  6.静态属性以及方法
+     static 存放在类的区域中
+	 普通属性存放在对象中     有没有声明静态变量都存在
+	 普通属性  用对象->变量
+	 静态变量  用类名::$变量  类外 对象::$变量  类名::$变量
+	 一改全改
+   
+   7.self与parent
+      
+	  self调用自身       self::
+	  parent调用父类     parent::
+	  $this 也可以调用继承父类的变量与方法
+	  继承的方法救赎自己的  所以$this比parent更合适
+	  
+   8.单例模式
+     思路：
+	 1. 保护/私有构造函数,防止外部实例化
+	 2. 内部一个公共方法判断实例化对象
+	 3. 类有一个静态属性存放对象
+     在类中自己初始化自己的对象放在一个静态的方法里返回
+	 将对象传给类内部的敬爱属性上，在静态方法中判断静态属性是否有对象，在判断是否初始化
+	 判断
+	 if(self::$ins instance of self)     instance of 判断$ins是否是自身类的事例
+	 类名::静态属性  得到对象
+	 final ---修改类  不能被继承    final方法可以继承但不能重写 final不能修饰属性
+	 
+	 问题1 子类重写__construct()方法还可以new一个新对象
+	     解决：__construct 加final关键字
+		 
+	 问题2：克隆一样
+	     解决：__clone
+	 
+		 class single
+	{
+		static protected $ins =null;
+		final protected function __construct()
+		{
+			echo $s =2;
+		}
+		static public function getInstance(){
+			if(self::$ins instanceof self){
+				return self::$ins;
+			}else{
+				self::$ins = new self();
+				return self::$ins;
+			}	
+		}
+	}
+	
+	9. 魔术方法 自动调用的方法
+	   构造函数
+	   __construct
+	    
+	   __call($method,$arge)  调用不存在/无权调用的方法 参数二为参数数组
+	   
+	   __callStatic           调用不存在/无权调用的静态方法 参数二为参数数组
+	   
+	   __clone                $t clone $s 时调用
+	   
+	   __set($name,$value)    外部给保护/私有/不存在的属性赋值调用 防止随便设置
+	   
+	   __get($name)           外部调用保护/私有的属性 有该方法 就会调用该方法 不存在属性也会调该属性
+	   
+	   __isset($name)         外部isset()判断不可访问/不存在属性时 被调用  可返回true起到欺骗作用
+	   
+	   __unset($name)         外部unset()销毁不可访问/不存在属性时 被调用
+	   
+	   析构函数
+	   __destruct
+	   
+	 10. 重写/覆盖:  子类重写父类的同名方法
+	     重载 ：存在多个同名方法，类型不同 在Java使用 PHP不能出现同名的方法
+	   
+     11.类的常量
+	    const SS = 12;
+		不用加$符
+		必须是定值 不能是属性,变量,函数的返回值
+		不能加private等属性,默认为public
+		调用 类名::常量
+		
+		魔术常量   
+		  __file__:当前文件的路径    框架开发或网站初始化脚本中,用来计算网站的根目录
+		  __line__:当前的行号      debug  记录行号
+	    
+	  12.抽象类 (abstract)
+	     不能被实例化
+		 可以继承  重写的方法可以不是抽象的  实现具体功能
+		 充当类的模板
+		 重写所有抽象方法 方法名与参数个数必须相同
+		 
+	  13.延迟绑定
+	      self的定义不是以定义是为准而是以计算结果为准  子类没有方法去父类找,调用相应的父类变量
+		  但是static:: 子类没有方法去父类找  但是调用自身的变量 运行期绑定 到那个类调用那个类的变量
+		  
+	  14.接口(interface)
+	     接口中方法并不能具体实现
+	     实现接口---implements
+		 可实现多借口
+		 接口中方法(抽象方法)必须重写所有方法
+		 接口可继承接口(extends)
+		 接口是一些方法,不能加属性 可以定义常量1
+		 接口的方法都是pubic类型的
+		 接口同一个类的方法,参考接口中方法,调用
+	 
+	  15.类的自动加载 __autoload 
+	     调用不存在的类  触发__autoload  并把类名自动传给__autoload函数
+		 可在__autoload里加载需要的类
+		 spl_autoload_register(函数名) 该方法是将自己写的自动加载函数注册成系统认识的自动加载函数
+		 
+	  16.异常
+	     $e = new Exception(,)  参数一 错误信息   参数二 错误代码
+		 throw $e;    抛出异常
+		 
+		 外部用try{}catch(Exception $e){} 捕捉异常
+		 $e->geMessage();
+		 @  异常抑制符    抑制warning错误的
+		 
+	  17.trait 代码复用  和普通类一样
+	     use trait1,trait2,trait3....;
+		 trait 之间也可以互相引用
+		 trait支持抽象方法  强制使用
+		 trait可以在方法中定义静态属性和静态方法
+		 同样trait也可以定义属性,使用类就不能定义同样名称的属性
+	trait ezcReflectionReturnInfo {
+		function getReturnType() { /*1*/ }
+		function getReturnDescription() { /*2*/ }
+	}
+
+	class ezcReflectionMethod extends ReflectionMethod {
+		use ezcReflectionReturnInfo;
+		/* ... */
+	}
+
+	class ezcReflectionFunction extends ReflectionFunction {
+		use ezcReflectionReturnInfo;
+		/* ... */
+	}
+	    解决冲突
+		insteadof 替代
+		as 起别名
+		as 还可以改变方法的限制 如 use HelloWorld { sayHello as protected; }
+	class Talker {
+				use A, B {
+					B::smallTalk insteadof A;
+					A::bigTalk insteadof B;
+				}
+			}
+
+	class Aliased_Talker {
+		use A, B {
+			B::smallTalk insteadof A;
+			A::bigTalk insteadof B;
+			B::bigTalk as talk;
+		}
+	}
+	
+	18.遍历对象
+	   foreach($this as $key => $value) {
+           print "$key => $value\n";
+       }
+	   
